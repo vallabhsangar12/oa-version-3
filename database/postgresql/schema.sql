@@ -1,59 +1,87 @@
--- Users Table
+-- =============================================
+-- OA Platform - PostgreSQL Schema Reference
+-- This file mirrors scripts/01-init-database.sql
+-- =============================================
+
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  profile_picture_url TEXT,
-  bio TEXT,
-  phone VARCHAR(20),
-  location VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Contact Submissions Table
+-- Password reset tokens
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Resumes metadata
+CREATE TABLE IF NOT EXISTS resumes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  file_path TEXT NOT NULL,
+  original_name TEXT NOT NULL,
+  uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Contact submissions
 CREATE TABLE IF NOT EXISTS contact_submissions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  subject VARCHAR(255) NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  subject TEXT NOT NULL,
   message TEXT NOT NULL,
-  status VARCHAR(50) DEFAULT 'new',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  status TEXT DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Pre-Interview Setup Table
+-- Pre-interview setup
 CREATE TABLE IF NOT EXISTS pre_interview_setup (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  difficulty_level VARCHAR(50) NOT NULL CHECK (difficulty_level IN ('easy', 'medium', 'hard')),
-  interview_type VARCHAR(50) NOT NULL CHECK (interview_type IN ('technical', 'behavioral')),
+  difficulty_level TEXT NOT NULL CHECK (difficulty_level IN ('easy', 'medium', 'hard')),
+  interview_type TEXT NOT NULL CHECK (interview_type IN ('technical', 'behavioral')),
   resume_url TEXT,
-  resume_filename VARCHAR(255),
+  resume_filename TEXT,
   resume_content TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Interview Sessions Table
+-- Interview sessions
 CREATE TABLE IF NOT EXISTS interview_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   pre_interview_setup_id UUID REFERENCES pre_interview_setup(id) ON DELETE SET NULL,
-  title VARCHAR(255),
+  title TEXT,
   duration_seconds INTEGER,
   score DECIMAL(5, 2),
   transcript TEXT,
   emotion_analysis JSONB,
   feedback TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Performance Reports Table
+-- Interview results
+CREATE TABLE IF NOT EXISTS interview_results (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  score INTEGER,
+  summary TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Performance reports
 CREATE TABLE IF NOT EXISTS performance_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id UUID NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
@@ -64,55 +92,6 @@ CREATE TABLE IF NOT EXISTS performance_reports (
   strengths TEXT,
   improvements TEXT,
   recommendations TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
-
--- Create Indexes for Performance
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_contact_submissions_status ON contact_submissions(status);
-CREATE INDEX IF NOT EXISTS idx_pre_interview_setup_user_id ON pre_interview_setup(user_id);
-CREATE INDEX IF NOT EXISTS idx_pre_interview_setup_created_at ON pre_interview_setup(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_interview_sessions_user_id ON interview_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_interview_sessions_created_at ON interview_sessions(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_performance_reports_session_id ON performance_reports(session_id);
-
--- Enable Row Level Security
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pre_interview_setup ENABLE ROW LEVEL SECURITY;
-ALTER TABLE interview_sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE performance_reports ENABLE ROW LEVEL SECURITY;
-
--- RLS Policies for Users
-CREATE POLICY "Users can view their own profile" ON users
-  FOR SELECT USING (auth.uid()::text = id::text);
-
-CREATE POLICY "Users can update their own profile" ON users
-  FOR UPDATE USING (auth.uid()::text = id::text);
-
--- RLS Policies for Pre-Interview Setup
-CREATE POLICY "Users can view their own setup" ON pre_interview_setup
-  FOR SELECT USING (auth.uid()::text = user_id::text);
-
-CREATE POLICY "Users can insert their own setup" ON pre_interview_setup
-  FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-
--- RLS Policies for Interview Sessions
-CREATE POLICY "Users can view their own interviews" ON interview_sessions
-  FOR SELECT USING (auth.uid()::text = user_id::text);
-
-CREATE POLICY "Users can insert their own interviews" ON interview_sessions
-  FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-
--- RLS Policies for Performance Reports
-CREATE POLICY "Users can view their own reports" ON performance_reports
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM interview_sessions
-      WHERE interview_sessions.id = performance_reports.session_id
-      AND interview_sessions.user_id::text = auth.uid()::text
-    )
-  );

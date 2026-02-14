@@ -1,109 +1,80 @@
 {
+  "database": "oa_logs",
+  "description": "MongoDB is used exclusively for logging, transcripts, emotion analysis, and debug data. No auth or relational data is stored here.",
   "collections": {
-    "users": {
-      "validator": {
-        "$jsonSchema": {
-          "bsonType": "object",
-          "required": ["email", "name", "password_hash"],
-          "properties": {
-            "_id": { "bsonType": "objectId" },
-            "name": { "bsonType": "string", "description": "User's full name" },
-            "email": { "bsonType": "string", "description": "User's email address" },
-            "password_hash": { "bsonType": "string", "description": "Hashed password" },
-            "profile_picture_url": { "bsonType": "string" },
-            "bio": { "bsonType": "string" },
-            "phone": { "bsonType": "string" },
-            "location": { "bsonType": "string" },
-            "created_at": { "bsonType": "date" },
-            "updated_at": { "bsonType": "date" }
-          }
-        }
+    "interview_logs": {
+      "description": "Full interview session logs including transcripts and AI analysis",
+      "schema": {
+        "userId": "string (UUID from PostgreSQL)",
+        "interviewId": "string (UUID from PostgreSQL)",
+        "transcript": "string",
+        "emotions": "object (emotion analysis data)",
+        "performance": "object (performance metrics)",
+        "metadata": "object (additional session metadata)",
+        "createdAt": "date"
       },
-      "indexes": [{ "key": { "email": 1 }, "unique": true }, { "key": { "created_at": -1 } }]
+      "indexes": [
+        { "key": { "userId": 1 } },
+        { "key": { "interviewId": 1 } },
+        { "key": { "createdAt": -1 } }
+      ]
     },
-    "contact_submissions": {
-      "validator": {
-        "$jsonSchema": {
-          "bsonType": "object",
-          "required": ["name", "email", "subject", "message"],
-          "properties": {
-            "_id": { "bsonType": "objectId" },
-            "name": { "bsonType": "string" },
-            "email": { "bsonType": "string" },
-            "phone": { "bsonType": "string" },
-            "subject": { "bsonType": "string" },
-            "message": { "bsonType": "string" },
-            "status": { "bsonType": "string", "enum": ["new", "read", "responded"] },
-            "created_at": { "bsonType": "date" },
-            "updated_at": { "bsonType": "date" }
-          }
-        }
+    "emotion_batches": {
+      "description": "Batched emotion detection results from video/audio analysis",
+      "schema": {
+        "userId": "string",
+        "sessionId": "string",
+        "emotions": "array of emotion objects",
+        "timestamp": "date",
+        "createdAt": "date"
       },
-      "indexes": [{ "key": { "created_at": -1 } }, { "key": { "status": 1 } }]
+      "indexes": [
+        { "key": { "sessionId": 1 } },
+        { "key": { "createdAt": -1 } }
+      ]
     },
-    "pre_interview_setup": {
-      "validator": {
-        "$jsonSchema": {
-          "bsonType": "object",
-          "required": ["user_id", "difficulty_level", "interview_type"],
-          "properties": {
-            "_id": { "bsonType": "objectId" },
-            "user_id": { "bsonType": "objectId" },
-            "difficulty_level": { "bsonType": "string", "enum": ["easy", "medium", "hard"] },
-            "interview_type": { "bsonType": "string", "enum": ["technical", "behavioral"] },
-            "resume_url": { "bsonType": "string" },
-            "resume_filename": { "bsonType": "string" },
-            "resume_content": { "bsonType": "string" },
-            "created_at": { "bsonType": "date" },
-            "updated_at": { "bsonType": "date" }
-          }
-        }
+    "text_sentiment_logs": {
+      "description": "Text-based sentiment analysis results",
+      "schema": {
+        "userId": "string",
+        "sessionId": "string",
+        "text": "string",
+        "sentiment": "object",
+        "confidence": "number",
+        "createdAt": "date"
       },
-      "indexes": [{ "key": { "user_id": 1 } }, { "key": { "created_at": -1 } }]
+      "indexes": [
+        { "key": { "sessionId": 1 } },
+        { "key": { "createdAt": -1 } }
+      ]
     },
-    "interview_sessions": {
-      "validator": {
-        "$jsonSchema": {
-          "bsonType": "object",
-          "required": ["user_id"],
-          "properties": {
-            "_id": { "bsonType": "objectId" },
-            "user_id": { "bsonType": "objectId" },
-            "pre_interview_setup_id": { "bsonType": "objectId" },
-            "title": { "bsonType": "string" },
-            "duration_seconds": { "bsonType": "int" },
-            "score": { "bsonType": "double" },
-            "transcript": { "bsonType": "string" },
-            "emotion_analysis": { "bsonType": "object" },
-            "feedback": { "bsonType": "string" },
-            "created_at": { "bsonType": "date" },
-            "updated_at": { "bsonType": "date" }
-          }
-        }
+    "voice_emotion_logs": {
+      "description": "Voice-based emotion analysis results",
+      "schema": {
+        "userId": "string",
+        "sessionId": "string",
+        "emotions": "array",
+        "audioMetadata": "object",
+        "createdAt": "date"
       },
-      "indexes": [{ "key": { "user_id": 1 } }, { "key": { "created_at": -1 } }]
+      "indexes": [
+        { "key": { "sessionId": 1 } },
+        { "key": { "createdAt": -1 } }
+      ]
     },
-    "performance_reports": {
-      "validator": {
-        "$jsonSchema": {
-          "bsonType": "object",
-          "required": ["session_id"],
-          "properties": {
-            "_id": { "bsonType": "objectId" },
-            "session_id": { "bsonType": "objectId" },
-            "communication_score": { "bsonType": "double" },
-            "technical_score": { "bsonType": "double" },
-            "confidence_score": { "bsonType": "double" },
-            "overall_score": { "bsonType": "double" },
-            "strengths": { "bsonType": "string" },
-            "improvements": { "bsonType": "string" },
-            "recommendations": { "bsonType": "string" },
-            "created_at": { "bsonType": "date" },
-            "updated_at": { "bsonType": "date" }
-          }
-        }
+    "debug_logs": {
+      "description": "Debug and session tracking logs",
+      "schema": {
+        "userId": "string (optional)",
+        "sessionId": "string (optional)",
+        "action": "string",
+        "details": "object",
+        "createdAt": "date"
       },
-      "indexes": [{ "key": { "session_id": 1 } }]
+      "indexes": [
+        { "key": { "createdAt": -1 } },
+        { "key": { "action": 1 } }
+      ]
     }
   }
 }
