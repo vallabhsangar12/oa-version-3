@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Force cache invalidation after architecture refactor
+  generateBuildId: () => "arch-refactor-" + Date.now(),
 }
 
 export default nextConfig
