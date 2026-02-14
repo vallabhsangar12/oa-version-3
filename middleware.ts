@@ -4,7 +4,12 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
 
-  if (!token && req.nextUrl.pathname.startsWith("/interview-ui")) {
+  const protectedPaths = ["/interview-ui", "/dashboard"];
+  const isProtected = protectedPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
+
+  if (!token && isProtected) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -12,5 +17,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/interview-ui/:path*"],
+  matcher: ["/interview-ui/:path*", "/dashboard/:path*"],
 };

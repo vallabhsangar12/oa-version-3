@@ -102,8 +102,8 @@ export function Navbar() {
                       </button>
                     </Link>
                     <button
-                      onClick={() => {
-                        localStorage.removeItem("token");
+                      onClick={async () => {
+                        await fetch("/api/auth/logout", { method: "POST" });
                         router.replace("/login");
                       }}
                       className="w-full px-4 py-2 text-left hover:bg-red-500/10 text-red-600 flex gap-2"

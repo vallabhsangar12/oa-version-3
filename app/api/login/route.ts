@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import dbConnect from "@/lib/db";
-import User from "@/models/User";
+import { queryOne } from "@/lib/postgres";
+import { signToken } from "@/lib/auth";
 
-const SECRET = "INTERVIEW_SECRET"; // keep same everywhere
+interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string;
+}
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
-
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -19,8 +21,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔍 Find user in MongoDB
-    const user = await User.findOne({ email });
+    const user = await queryOne<UserRow>(
+      "SELECT id, name, email, password_hash FROM users WHERE email = $1",
+      [email.trim().toLowerCase()]
+    );
+
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -28,8 +33,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Verify password
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -37,26 +41,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔑 Create JWT
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    });
 
     const res = NextResponse.json({
       message: "Login successful",
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         name: user.name,
       },
     });
 
-    // 🍪 Store token in cookie
     res.cookies.set("token", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return res;
@@ -66,6 +71,5 @@ export async function POST(req: Request) {
       { error: "Internal server error" },
       { status: 500 }
     );
-    
   }
 }

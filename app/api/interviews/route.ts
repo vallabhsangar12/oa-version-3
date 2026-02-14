@@ -1,65 +1,76 @@
-import { createClient } from "@supabase/supabase-js"
-import { type NextRequest, NextResponse } from "next/server"
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+import { type NextRequest, NextResponse } from "next/server";
+import { query } from "@/lib/postgres";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { userId, title, duration, score, transcript, emotionAnalysis, feedback } = body
+    const body = await request.json();
+    const {
+      userId,
+      title,
+      duration,
+      score,
+      transcript,
+      emotionAnalysis,
+      feedback,
+    } = body;
 
     if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "User ID required" },
+        { status: 400 }
+      );
     }
 
-    const { data, error } = await supabase.from("interview_sessions").insert([
-      {
-        user_id: userId,
-        title: title || "Interview Session",
-        duration_seconds: duration || 0,
-        score: score || 0,
-        transcript: transcript || null,
-        emotion_analysis: emotionAnalysis || null,
-        feedback: feedback || null,
-      },
-    ])
+    const rows = await query(
+      `INSERT INTO interview_sessions (user_id, title, duration_seconds, score, transcript, emotion_analysis, feedback)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [
+        userId,
+        title || "Interview Session",
+        duration || 0,
+        score || 0,
+        transcript || null,
+        emotionAnalysis ? JSON.stringify(emotionAnalysis) : null,
+        feedback || null,
+      ]
+    );
 
-    if (error) {
-      console.error("Database error:", error)
-      return NextResponse.json({ error: "Failed to save interview" }, { status: 500 })
-    }
-
-    return NextResponse.json({ message: "Interview saved successfully", data }, { status: 201 })
+    return NextResponse.json(
+      { message: "Interview saved successfully", data: rows[0] },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Interviews POST API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get("userId")
+    const userId = request.nextUrl.searchParams.get("userId");
 
     if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "User ID required" },
+        { status: 400 }
+      );
     }
 
-    const { data, error } = await supabase
-      .from("interview_sessions")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
+    const rows = await query(
+      "SELECT * FROM interview_sessions WHERE user_id = $1 ORDER BY created_at DESC",
+      [userId]
+    );
 
-    if (error) {
-      return NextResponse.json({ error: "Failed to fetch interviews" }, { status: 500 })
-    }
-
-    return NextResponse.json({ data }, { status: 200 })
+    return NextResponse.json({ data: rows }, { status: 200 });
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Interviews GET API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

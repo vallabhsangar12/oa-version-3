@@ -38,17 +38,59 @@ export async function getInterviewLogById(interviewId: string) {
   return collection.findOne({ interviewId });
 }
 
+export async function logEmotionBatch(data: {
+  userId: string;
+  sessionId: string;
+  emotions: Record<string, unknown>[];
+}): Promise<string> {
+  const db = await getDb();
+  const result = await db.collection("emotion_batches").insertOne({
+    ...data,
+    timestamp: new Date(),
+    createdAt: new Date(),
+  });
+  return result.insertedId.toString();
+}
+
+export async function logTextSentiment(data: {
+  userId?: string;
+  sessionId?: string;
+  text: string;
+  sentiment: Record<string, unknown>;
+  confidence?: number;
+}): Promise<string> {
+  const db = await getDb();
+  const result = await db.collection("text_sentiment_logs").insertOne({
+    ...data,
+    createdAt: new Date(),
+  });
+  return result.insertedId.toString();
+}
+
+export async function logVoiceEmotion(data: {
+  userId?: string;
+  sessionId?: string;
+  emotions: Record<string, unknown>[];
+  audioMetadata?: Record<string, unknown>;
+}): Promise<string> {
+  const db = await getDb();
+  const result = await db.collection("voice_emotion_logs").insertOne({
+    ...data,
+    createdAt: new Date(),
+  });
+  return result.insertedId.toString();
+}
+
 export async function logDebugSession(data: {
   userId?: string;
   sessionId?: string;
   action: string;
   details: Record<string, unknown>;
-}) {
+}): Promise<string> {
   const db = await getDb();
-  const collection = db.collection("debug_logs");
-
-  await collection.insertOne({
+  const result = await db.collection("debug_logs").insertOne({
     ...data,
     createdAt: new Date(),
   });
+  return result.insertedId.toString();
 }

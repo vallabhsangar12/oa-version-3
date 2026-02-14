@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase =
-  SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
-    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    : null;
+import { logTextSentiment } from "@/lib/interview-logger";
 
 const POSITIVE_WORDS = [
   "good", "great", "excellent", "confident", "happy", "excited", "positive",
@@ -18,7 +10,7 @@ const NEGATIVE_WORDS = [
   "stressed", "confused", "unsure", "doubt", "problem", "issue",
 ];
 
-function computeSentimentScore(text: string) {
+function computeSentimentScore(text: string): number {
   const tokens = text.toLowerCase().split(/\W+/).filter(Boolean);
   let pos = 0;
   let neg = 0;
@@ -29,13 +21,10 @@ function computeSentimentScore(text: string) {
   }
 
   const total = pos + neg;
-  if (total === 0) {
-    return 60; // neutral-ish
-  }
+  if (total === 0) return 60;
 
-  const ratio = (pos - neg) / total; // -1 to +1
-  const score = Math.round(((ratio + 1) / 2) * 100); // map to 0–100
-
+  const ratio = (pos - neg) / total;
+  const score = Math.round(((ratio + 1) / 2) * 100);
   return Math.max(0, Math.min(100, score));
 }
 
@@ -45,36 +34,43 @@ export async function POST(req: Request) {
 
     const text: string = payload.text || "";
     if (!text || typeof text !== "string") {
-      return NextResponse.json({ ok: false, error: "Text is required" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Text is required" },
+        { status: 400 }
+      );
     }
 
     const sentimentScore = computeSentimentScore(text);
 
-    const user_id = payload.userId || null;
-    const session_id = payload.sessionId || null;
+    const userId: string | undefined = payload.userId || undefined;
+    const sessionId: string | undefined = payload.sessionId || undefined;
 
-    if (supabase) {
-      const { error } = await supabase.from("text_sentiment_reports").insert([
-        {
-          user_id,
-          session_id,
-          text,
-          sentiment_score: sentimentScore,
-        },
-      ]);
-      if (error) console.error("Supabase text_sentiment_reports error:", error.message);
+    // Log to MongoDB
+    try {
+      await logTextSentiment({
+        userId,
+        sessionId,
+        text,
+        sentiment: { score: sentimentScore },
+        confidence: sentimentScore,
+      });
+    } catch (logErr) {
+      console.error("MongoDB text sentiment log error:", logErr);
     }
 
-    return NextResponse.json({
-      ok: true,
-      sentimentScore,
-    });
-  } catch (err: any) {
+    return NextResponse.json({ ok: true, sentimentScore });
+  } catch (err) {
     console.error("Error in /api/text-sentiment:", err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: "text-sentiment endpoint running" });
+  return NextResponse.json({
+    ok: true,
+    message: "text-sentiment endpoint running",
+  });
 }

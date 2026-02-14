@@ -9,13 +9,14 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,15 +38,10 @@ export default function LoginPage() {
         return;
       }
 
-      alert("✅ Login successful");
-
-      localStorage.setItem("token", data.token || "logged_in");
-      router.replace("/");
-
-      // 👉 Redirect after login
-      router.push("/interview-ui"); // change if needed
-    } catch (err) {
-      alert("❌ Something went wrong");
+      // Cookie is set by the server (httpOnly), no localStorage needed
+      router.push("/interview-ui");
+    } catch {
+      alert("Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -67,10 +63,13 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
+              <label className="text-sm font-medium" htmlFor="email">
+                Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -82,17 +81,32 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
+              <label className="text-sm font-medium" htmlFor="password">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
-                  type="password"
-                  placeholder="••••••••"
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 

@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     const sessionId = payload.sessionId || null;
     const userId = payload.userId || null;
 
-    const batch: FaceItem[] = payload.batch.map((b: any) => ({
+    const batch: FaceItem[] = payload.batch.map((b: Record<string, unknown>) => ({
       ts: Number(b.ts) || Date.now() / 1000,
       label: String(b.label || "unknown"),
       confidence: Number(b.confidence || 0),
@@ -141,10 +141,10 @@ export async function POST(req: Request) {
       },
     });
 
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error in /api/emotion:", err);
     return NextResponse.json(
-      { ok: false, error: err?.message || String(err) },
+      { ok: false, error: err instanceof Error ? err.message : String(err) },
       { status: 500 }
     );
   }

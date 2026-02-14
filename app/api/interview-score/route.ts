@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { query } from "@/lib/postgres";
 import {
   computeInterviewConfidenceScore,
-  FaceMetrics,
-  VoiceMetrics,
-  TextMetrics,
+  type FaceMetrics,
+  type VoiceMetrics,
+  type TextMetrics,
 } from "@/lib/scoring";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase =
-  SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
-    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    : null;
 
 export async function POST(req: Request) {
   try {
@@ -26,28 +18,34 @@ export async function POST(req: Request) {
     if (!face || !voice || !text) {
       return NextResponse.json(
         { ok: false, error: "face, voice and text metrics are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const result = computeInterviewConfidenceScore({ face, voice, text });
 
-    const user_id = body.userId || null;
-    const session_id = body.sessionId || null;
+    const userId = body.userId || null;
+    const sessionId = body.sessionId || null;
 
-    if (supabase) {
-      const { error } = await supabase.from("interview_scores").insert([
-        {
-          user_id,
-          session_id,
-          final_score: result.score,
-          breakdown: result.breakdown,
-          face_metrics: result.details.face,
-          voice_metrics: result.details.voice,
-          text_metrics: result.details.text,
-        },
-      ]);
-      if (error) console.error("Supabase interview_scores error:", error.message);
+    // Store in PostgreSQL
+    try {
+      await query(
+        `INSERT INTO interview_results (user_id, score, summary)
+         VALUES ($1, $2, $3)`,
+        [
+          userId,
+          result.score,
+          JSON.stringify({
+            sessionId,
+            breakdown: result.breakdown,
+            face: result.details.face,
+            voice: result.details.voice,
+            text: result.details.text,
+          }),
+        ]
+      );
+    } catch (dbErr) {
+      console.error("PostgreSQL interview_results insert error:", dbErr);
     }
 
     return NextResponse.json({
@@ -56,12 +54,18 @@ export async function POST(req: Request) {
       breakdown: result.breakdown,
       details: result.details,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error in /api/interview-score:", err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: "interview-score endpoint running" });
+  return NextResponse.json({
+    ok: true,
+    message: "interview-score endpoint running",
+  });
 }

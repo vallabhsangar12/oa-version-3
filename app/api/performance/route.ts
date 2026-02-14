@@ -1,14 +1,9 @@
-import { createClient } from "@supabase/supabase-js"
-import { type NextRequest, NextResponse } from "next/server"
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+import { type NextRequest, NextResponse } from "next/server";
+import { query, queryOne } from "@/lib/postgres";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       sessionId,
       communicationScore,
@@ -18,54 +13,73 @@ export async function POST(request: NextRequest) {
       strengths,
       improvements,
       recommendations,
-    } = body
+    } = body;
 
     if (!sessionId) {
-      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Session ID required" },
+        { status: 400 }
+      );
     }
 
-    const { data, error } = await supabase.from("performance_reports").insert([
-      {
-        session_id: sessionId,
-        communication_score: communicationScore || 0,
-        technical_score: technicalScore || 0,
-        confidence_score: confidenceScore || 0,
-        overall_score: overallScore || 0,
-        strengths: strengths || null,
-        improvements: improvements || null,
-        recommendations: recommendations || null,
-      },
-    ])
+    const rows = await query(
+      `INSERT INTO performance_reports (session_id, communication_score, technical_score, confidence_score, overall_score, strengths, improvements, recommendations)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
+      [
+        sessionId,
+        communicationScore || 0,
+        technicalScore || 0,
+        confidenceScore || 0,
+        overallScore || 0,
+        strengths || null,
+        improvements || null,
+        recommendations || null,
+      ]
+    );
 
-    if (error) {
-      console.error("Database error:", error)
-      return NextResponse.json({ error: "Failed to save performance report" }, { status: 500 })
-    }
-
-    return NextResponse.json({ message: "Performance report saved successfully", data }, { status: 201 })
+    return NextResponse.json(
+      { message: "Performance report saved successfully", data: rows[0] },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Performance POST API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionId = request.nextUrl.searchParams.get("sessionId")
+    const sessionId = request.nextUrl.searchParams.get("sessionId");
 
     if (!sessionId) {
-      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Session ID required" },
+        { status: 400 }
+      );
     }
 
-    const { data, error } = await supabase.from("performance_reports").select("*").eq("session_id", sessionId).single()
+    const data = await queryOne(
+      "SELECT * FROM performance_reports WHERE session_id = $1",
+      [sessionId]
+    );
 
-    if (error) {
-      return NextResponse.json({ error: "Failed to fetch performance report" }, { status: 500 })
+    if (!data) {
+      return NextResponse.json(
+        { error: "Performance report not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ data }, { status: 200 })
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Performance GET API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
