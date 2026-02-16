@@ -46,7 +46,10 @@ export default function DashboardPage() {
                 {data?.user ? `Welcome back, ${data.user.name}` : "Track your interview preparation progress"}
               </p>
             </div>
-            <Button onClick={() => router.push("/interview-ui")}>
+            <Button
+              onClick={() => router.push("/interview-ui")}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <Plus className="mr-2 h-4 w-4" /> New Interview
             </Button>
           </div>
@@ -78,7 +81,10 @@ export default function DashboardPage() {
               <p className="mx-auto mt-2 max-w-md text-muted-foreground">
                 Start your first AI-powered interview to see your performance data here.
               </p>
-              <Button className="mt-6" onClick={() => router.push("/interview-ui")}>
+              <Button
+                className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => router.push("/interview-ui")}
+              >
                 Start Your First Interview
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

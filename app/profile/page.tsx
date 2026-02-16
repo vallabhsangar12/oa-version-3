@@ -91,7 +91,7 @@ export default function ProfilePage() {
               {/* Avatar Section */}
               <Card className="border border-border p-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 text-white">
                     <User className="h-8 w-8" />
                   </div>
                   <div>
@@ -136,7 +136,11 @@ export default function ProfilePage() {
                     <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                   </div>
 
-                  <Button type="submit" disabled={isSaving}>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isSaving}
+                  >
                     {isSaving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...

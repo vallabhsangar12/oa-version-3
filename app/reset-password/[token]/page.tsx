@@ -131,7 +131,11 @@ export default function ResetPasswordPage() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Resetting..." : "Reset Password"}
                 </Button>
               </form>

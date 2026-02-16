@@ -8,7 +8,7 @@ export default function TermsPage() {
       <Navbar />
       <main className="min-h-screen py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
+          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Terms of Service</h1>
 
           <div className="space-y-8">
             <Card className="p-6">

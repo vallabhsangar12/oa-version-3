@@ -65,7 +65,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 font-bold text-lg">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 text-white font-bold text-sm">
               OA
             </div>
             <span className="hidden sm:inline text-foreground">OneselfAI</span>
@@ -99,7 +99,7 @@ export function Navbar() {
                   onClick={() => setProfileOpen((v) => !v)}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 text-white">
                     <User className="h-4 w-4" />
                   </div>
                   <ChevronDown className={`h-4 w-4 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
@@ -132,7 +132,10 @@ export function Navbar() {
                 <Button variant="ghost" onClick={() => router.push("/login")} className="text-sm">
                   Sign In
                 </Button>
-                <Button onClick={() => router.push("/register")} className="text-sm">
+                <Button
+                  onClick={() => router.push("/register")}
+                  className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                >
                   Get Started
                 </Button>
               </div>
@@ -203,7 +206,7 @@ export function Navbar() {
                     Sign In
                   </Button>
                   <Button
-                    className="w-full text-sm"
+                    className="w-full text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
                     onClick={() => {
                       router.push("/register")
                       setMobileOpen(false)

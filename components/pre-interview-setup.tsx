@@ -107,7 +107,7 @@ export function PreInterviewSetup({ onComplete, onCancel }: PreInterviewSetupPro
             <div
               key={s}
               className={`h-1.5 flex-1 rounded-full transition-colors ${
-                s <= step ? "bg-primary" : "bg-secondary"
+                s <= step ? "bg-gradient-to-r from-purple-600 to-blue-600" : "bg-secondary"
               }`}
             />
           ))}
@@ -129,14 +129,14 @@ export function PreInterviewSetup({ onComplete, onCancel }: PreInterviewSetupPro
                   onClick={() => setDifficultyLevel(level)}
                   className={`rounded-lg border-2 p-5 text-left transition-all ${
                     difficultyLevel === level
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/30 hover:bg-secondary/50"
+                      ? "border-purple-500 bg-purple-500/5"
+                      : "border-border hover:border-purple-500/30 hover:bg-secondary/50"
                   }`}
                 >
                   <div
                     className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
                       difficultyLevel === level
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
                         : "bg-secondary text-foreground"
                     }`}
                   >
@@ -166,14 +166,14 @@ export function PreInterviewSetup({ onComplete, onCancel }: PreInterviewSetupPro
                   onClick={() => setInterviewType(type)}
                   className={`rounded-lg border-2 p-6 text-left transition-all ${
                     interviewType === type
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/30 hover:bg-secondary/50"
+                      ? "border-purple-500 bg-purple-500/5"
+                      : "border-border hover:border-purple-500/30 hover:bg-secondary/50"
                   }`}
                 >
                   <div
                     className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
                       interviewType === type
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white"
                         : "bg-secondary text-foreground"
                     }`}
                   >
@@ -252,7 +252,7 @@ export function PreInterviewSetup({ onComplete, onCancel }: PreInterviewSetupPro
           >
             {step === 1 ? "Cancel" : "Back"}
           </Button>
-          <Button onClick={handleNext} className="flex-1" disabled={isSubmitting}>
+          <Button onClick={handleNext} className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={isSubmitting}>
             {isSubmitting ? "Starting..." : step === 3 ? "Start Interview" : "Next"}
           </Button>
         </div>

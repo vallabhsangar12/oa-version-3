@@ -179,7 +179,11 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              disabled={isLoading}
+            >
               {isLoading ? "Creating account..." : "Create Account"}
               {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
@@ -190,7 +194,7 @@ export default function RegisterPage() {
               {"Already have an account? "}
               <Link
                 href="/login"
-                className="font-semibold text-foreground hover:underline"
+                className="font-semibold text-purple-400 hover:text-purple-300 hover:underline transition-colors"
               >
                 Sign in
               </Link>
