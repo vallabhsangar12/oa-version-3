@@ -1,209 +1,271 @@
-"use client"
+"use client";
 
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
-import { TrendingUp, Award, Clock, Target } from "lucide-react"
+  Target,
+  Award,
+  Clock,
+  Play,
+  FileText,
+  ChevronRight,
+  Briefcase,
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface UserData {
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+interface InterviewSetup {
+  _id: string;
+  interviewType: string;
+  difficultyLevel: string;
+  jobRole?: string;
+  status?: string;
+  createdAt: string;
+}
+
+interface InterviewSession {
+  _id: string;
+  title?: string;
+  score?: number;
+  durationSeconds?: number;
+  createdAt: string;
+}
 
 export default function DashboardPage() {
-  const performanceData = [
-    { name: "Week 1", score: 65 },
-    { name: "Week 2", score: 72 },
-    { name: "Week 3", score: 78 },
-    { name: "Week 4", score: 85 },
-    { name: "Week 5", score: 88 },
-    { name: "Week 6", score: 92 },
-  ]
+  const router = useRouter();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [setups, setSetups] = useState<InterviewSetup[]>([]);
+  const [sessions, setSessions] = useState<InterviewSession[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const skillsData = [
-    { name: "Communication", value: 85 },
-    { name: "Technical", value: 78 },
-    { name: "Problem Solving", value: 82 },
-    { name: "Confidence", value: 88 },
-  ]
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [userRes, historyRes] = await Promise.all([
+          fetch("/api/auth/me"),
+          fetch("/api/interview/history"),
+        ]);
 
-  const emotionData = [
-    { name: "Confident", value: 45 },
-    { name: "Neutral", value: 35 },
-    { name: "Anxious", value: 15 },
-    { name: "Excited", value: 5 },
-  ]
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData.user);
+        }
 
-  const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b"]
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          setSetups(historyData.setups || []);
+          setSessions(historyData.sessions || []);
+        }
+      } catch {
+        toast.error("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const recentInterviews = [
-    { id: 1, date: "2024-01-15", score: 92, duration: "15:30", status: "Completed" },
-    { id: 2, date: "2024-01-14", score: 88, duration: "14:45", status: "Completed" },
-    { id: 3, date: "2024-01-13", score: 85, duration: "16:20", status: "Completed" },
-  ]
+    fetchData();
+  }, []);
+
+  const totalInterviews = setups.length;
+  const completedSessions = sessions.filter((s) => s.score && s.score > 0);
+  const averageScore =
+    completedSessions.length > 0
+      ? Math.round(
+          completedSessions.reduce((sum, s) => sum + (s.score || 0), 0) /
+            completedSessions.length
+        )
+      : 0;
+  const lastScore =
+    completedSessions.length > 0 ? completedSessions[0]?.score || 0 : 0;
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen py-8 px-4">
+          <div className="max-w-7xl mx-auto">
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-5 w-96 mb-8" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32" />
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Skeleton className="h-96 lg:col-span-2" />
+              <Skeleton className="h-96" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen py-8 px-4">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Track your interview preparation progress</p>
+            <h1 className="text-3xl font-bold mb-1">
+              Welcome back, {user?.name || "User"}
+            </h1>
+            <p className="text-muted-foreground">
+              Track your interview preparation progress and start new sessions.
+            </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer border border-accent/10 bg-gradient-to-br from-card to-card/50 hover:bg-gradient-to-br hover:from-card/80 hover:to-card/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Average Score</p>
-                  <p className="text-3xl font-bold group-hover:text-accent transition-colors duration-300">87</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Total Interviews
+                  </p>
+                  <p className="text-3xl font-bold">{totalInterviews}</p>
                 </div>
-                <Award className="h-10 w-10 text-accent opacity-50 group-hover:scale-110 transition-transform duration-300" />
+                <Target className="h-10 w-10 text-accent opacity-60" />
               </div>
             </Card>
-            <Card className="p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer border border-accent/10 bg-gradient-to-br from-card to-card/50 hover:bg-gradient-to-br hover:from-card/80 hover:to-card/30">
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Interviews</p>
-                  <p className="text-3xl font-bold group-hover:text-accent transition-colors duration-300">12</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Average Score
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {averageScore > 0 ? averageScore : "--"}
+                  </p>
                 </div>
-                <Target className="h-10 w-10 text-accent opacity-50 group-hover:scale-110 transition-transform duration-300" />
+                <Award className="h-10 w-10 text-accent opacity-60" />
               </div>
             </Card>
-            <Card className="p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer border border-accent/10 bg-gradient-to-br from-card to-card/50 hover:bg-gradient-to-br hover:from-card/80 hover:to-card/30">
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Time</p>
-                  <p className="text-3xl font-bold group-hover:text-accent transition-colors duration-300">3h 45m</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Last Score
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {lastScore > 0 ? lastScore : "--"}
+                  </p>
                 </div>
-                <Clock className="h-10 w-10 text-accent opacity-50 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-            </Card>
-            <Card className="p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer border border-accent/10 bg-gradient-to-br from-card to-card/50 hover:bg-gradient-to-br hover:from-card/80 hover:to-card/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Improvement</p>
-                  <p className="text-3xl font-bold group-hover:text-accent transition-colors duration-300">+27%</p>
-                </div>
-                <TrendingUp className="h-10 w-10 text-accent opacity-50 group-hover:scale-110 transition-transform duration-300" />
+                <Clock className="h-10 w-10 text-accent opacity-60" />
               </div>
             </Card>
           </div>
 
-          {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Performance Trend */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Performance Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis stroke="var(--muted-foreground)" />
-                  <YAxis stroke="var(--muted-foreground)" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="var(--accent)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--accent)", r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-
-            {/* Skills Breakdown */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Skills Breakdown</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={skillsData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis stroke="var(--muted-foreground)" />
-                  <YAxis stroke="var(--muted-foreground)" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          </div>
-
-          {/* Emotion Analysis & Recent Interviews */}
+          {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Emotion Distribution */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Emotion Distribution</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={emotionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name} ${value}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {emotionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </Card>
-
-            {/* Recent Interviews */}
+            {/* Previous Interviews */}
             <div className="lg:col-span-2">
               <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Recent Interviews</h3>
-                <div className="space-y-3">
-                  {recentInterviews.map((interview) => (
-                    <div
-                      key={interview.id}
-                      className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium">{interview.date}</p>
-                        <p className="text-sm text-muted-foreground">{interview.duration}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-accent">{interview.score}</p>
-                          <p className="text-xs text-muted-foreground">Score</p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          View Report
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold">Previous Interviews</h2>
                 </div>
+
+                {setups.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      No interviews yet. Start your first one!
+                    </p>
+                    <Link href="/interview/setup">
+                      <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
+                        <Play className="mr-2 h-4 w-4" /> Start Interview
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {setups.slice(0, 10).map((setup) => (
+                      <Link
+                        key={setup._id}
+                        href={`/interview/session/${setup._id}`}
+                      >
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-accent" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm capitalize">
+                                {setup.interviewType} - {setup.difficultyLevel}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {setup.jobRole && `${setup.jobRole} - `}
+                                {new Date(setup.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="space-y-6">
+              {/* Start Interview Card */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-3">New Interview</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Set up a new interview session with your preferences.
+                </p>
+                <Link href="/interview/setup">
+                  <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                    <Play className="mr-2 h-4 w-4" /> Start Interview
+                  </Button>
+                </Link>
+              </Card>
+
+              {/* Quick Stats */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-3">Account</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Name</span>
+                    <span className="font-medium">{user?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium truncate ml-2 max-w-[180px]">
+                      {user?.email}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Member since</span>
+                    <span className="font-medium">
+                      {user?.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString()
+                        : "--"}
+                    </span>
+                  </div>
+                </div>
+                <Link href="/profile" className="block mt-4">
+                  <Button variant="outline" className="w-full">
+                    Edit Profile
+                  </Button>
+                </Link>
               </Card>
             </div>
           </div>
@@ -211,5 +273,5 @@ export default function DashboardPage() {
       </main>
       <Footer />
     </>
-  )
+  );
 }

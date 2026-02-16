@@ -41,6 +41,10 @@ const PreInterviewSchema = new mongoose.Schema(
     resumeUrl: String,
     resumeFilename: String,
     resumeContent: String,
+    jobRole: String,
+    experience: Number,
+    techStack: [String],
+    status: { type: String, default: "pending" },
   },
   { timestamps: true }
 );
@@ -160,6 +164,16 @@ export async function createPreInterviewSetup(
 export async function getLatestPreInterviewSetup(userId: string) {
   await dbConnect();
   return PreInterview.findOne({ userId }).sort({ createdAt: -1 });
+}
+
+export async function getPreInterviewById(id: string) {
+  await dbConnect();
+  return PreInterview.findById(id);
+}
+
+export async function getUserInterviewSetups(userId: string) {
+  await dbConnect();
+  return PreInterview.find({ userId }).sort({ createdAt: -1 });
 }
 
 // ----------------------
