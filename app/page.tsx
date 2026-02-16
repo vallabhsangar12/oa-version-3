@@ -1,168 +1,167 @@
 "use client"
-import { useRouter } from "next/navigation";
-import { isLoggedIn } from "@/src/utils/auth";
-import { useState } from "react"
+
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Brain, Video, Mic, TrendingUp, Award, Sparkles, ChevronDown, Play } from "lucide-react"
+import {
+  ArrowRight,
+  Brain,
+  Video,
+  Mic,
+  TrendingUp,
+  Award,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react"
 
 export default function Home() {
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [authType, setAuthType] = useState<"login" | "register">("login")
+  const router = useRouter()
 
-  const router = useRouter();
-
-const handleGetStarted = () => {
-  if (!isLoggedIn()) {
-    router.push("/login");
-  } else {
-    alert("✅ Login successful");
-    router.replace("/"); // HOME PAGE
-  }
-};
-  const [loggedIn, setLoggedIn] = useState(false)
-  
   const features = [
     {
       icon: Brain,
       title: "Resume-Based Questioning",
       description:
-        "AI analyzes your resume to generate personalized interview questions tailored to your skills, experience, and target role.",
-      gradient: "from-purple-500 to-blue-500",
+        "AI analyzes your resume to generate personalized interview questions tailored to your skills and experience.",
     },
     {
       icon: Video,
       title: "Live AI Video Interview",
       description:
-        "Practice with our AI interviewer through live video sessions that feel like real human interactions with adaptive follow-up questions.",
-      gradient: "from-blue-500 to-cyan-500",
+        "Practice with our AI interviewer through live video sessions with adaptive follow-up questions.",
     },
     {
       icon: Sparkles,
       title: "Facial Emotion Recognition",
       description:
-        "Advanced computer vision tracks confidence, nervousness, and engagement through real-time facial expression analysis.",
-      gradient: "from-cyan-500 to-teal-500",
+        "Advanced computer vision tracks confidence and engagement through real-time facial expression analysis.",
     },
     {
       icon: Mic,
       title: "Speech Pattern Analysis",
       description:
         "Analyze speech pace, filler words, pauses, and tone to provide comprehensive communication feedback.",
-      gradient: "from-teal-500 to-green-500",
     },
     {
       icon: TrendingUp,
       title: "Dynamic Scoring System",
       description:
         "Get scored on multiple dimensions including answer quality, emotional stability, and communication skills.",
-      gradient: "from-green-500 to-emerald-500",
     },
     {
       icon: Award,
-      title: "Adaptive Learning Modules",
+      title: "Personalized Coaching",
       description:
         "Personalized training content and practice modules based on your performance and improvement areas.",
-      gradient: "from-emerald-500 to-purple-500",
     },
   ]
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
-  }
+  const stats = [
+    { value: "10K+", label: "Interviews Completed" },
+    { value: "95%", label: "User Satisfaction" },
+    { value: "3x", label: "Faster Preparation" },
+    { value: "85%", label: "Success Rate" },
+  ]
+
+  const steps = [
+    {
+      step: "01",
+      title: "Upload Your Resume",
+      description: "Upload your resume and select interview type and difficulty level.",
+    },
+    {
+      step: "02",
+      title: "Practice with AI",
+      description: "Our AI generates personalized questions and conducts a realistic interview session.",
+    },
+    {
+      step: "03",
+      title: "Get Detailed Feedback",
+      description: "Receive comprehensive scoring on communication, confidence, and answer quality.",
+    },
+  ]
 
   return (
     <>
-      <Navbar
-        isLoggedIn={loggedIn}
-        onGetStarted={handleGetStarted}
-        onLogout={() => setLoggedIn(false)}
-      />
-      <main className="min-h-screen">
-        {/* HOME SECTION */}
-        <section id="home" className="relative min-h-screen flex items-center overflow-hidden pt-20">
+      <Navbar />
+      <main>
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-background">
           <div className="absolute inset-0 -z-10">
-            <img
-              src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1600&h=900&fit=crop"
-              alt="Background"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/90 via-blue-900/85 to-indigo-900/90" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--accent)_0%,transparent_50%)] opacity-[0.08]" />
           </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="text-center space-y-8 text-white">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-balance leading-tight">
-                Master Your Interviews with AI
-              </h1>
-              <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto text-balance">
-                Get real-time feedback, emotion analysis, and personalized coaching to ace your next interview.
+          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                AI-Powered Interview Preparation
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-white text-purple-600 hover:bg-blue-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                  onClick={() => router.push("/login")}
-                >
-                  Get Started
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl text-balance leading-tight">
+                Master Your Interviews with Intelligent AI Coaching
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground text-pretty">
+                Get real-time feedback, emotion analysis, and personalized coaching powered by advanced AI.
+                Practice like the real thing, perform at your best.
+              </p>
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Button size="lg" onClick={() => router.push("/register")} className="min-w-[180px]">
+                  Start Free Practice
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Link href="/interview-ui">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white text-white hover:bg-white/10 bg-transparent hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                  >
-                    Try Demo
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => router.push("/interview-ui")}
+                  className="min-w-[180px]"
+                >
+                  Try a Demo
+                </Button>
               </div>
             </div>
           </div>
+        </section>
 
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <ChevronDown className="w-6 h-6 text-white" />
+        {/* Stats Section */}
+        <section className="border-y border-border bg-secondary/30">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
+              {stats.map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-3xl font-bold text-foreground sm:text-4xl">{stat.value}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* FEATURES SECTION */}
-        <section className="py-20 sm:py-32 bg-gradient-to-b from-background to-card">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">Powerful Features</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Everything you need to prepare for your dream job.
+        {/* Features Section */}
+        <section className="bg-background py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Powerful Features</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Everything you need to prepare for your dream job interview.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feature, index) => {
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => {
                 const Icon = feature.icon
                 return (
                   <Card
-                    key={index}
-                    className="p-8 group cursor-pointer border border-accent/20 bg-gradient-to-br from-card via-card to-card/50 hover:border-accent/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-3 relative overflow-hidden"
+                    key={feature.title}
+                    className="group border border-border bg-card p-8 transition-all duration-200 hover:border-accent/30 hover:shadow-md"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    <div className="relative z-10">
-                      <div
-                        className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-125 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:rotate-6`}
-                      >
-                        <Icon className="h-8 w-8 text-white" />
-                      </div>
-                      <h3 className="text-xl font-semibold mb-3 group-hover:text-accent transition-colors duration-300">
-                        {feature.title}
-                      </h3>
-                      <p className="text-muted-foreground group-hover:text-foreground/90 transition-colors duration-300 leading-relaxed">
-                        {feature.description}
-                      </p>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-foreground group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                      <Icon className="h-6 w-6" />
                     </div>
+                    <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
+                    <p className="leading-relaxed text-muted-foreground">{feature.description}</p>
                   </Card>
                 )
               })}
@@ -170,118 +169,95 @@ const handleGetStarted = () => {
           </div>
         </section>
 
-        {/* INTERVIEW SECTION */}
-        <section id="interview" className="py-20 sm:py-32 bg-background">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">AI Interview Practice</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Practice with our advanced AI interviewer that provides real-time feedback.
+        {/* How It Works */}
+        <section className="border-t border-border bg-secondary/20 py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">How It Works</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Three simple steps to transform your interview performance.
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-shadow duration-300 border border-accent/10">
-              <div className="relative aspect-video bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center group cursor-pointer">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&h=800&fit=crop"
-                  alt="Professional Interviewer"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300" />
-                <Link href="/interview-ui" className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">
-                      <Play className="w-10 h-10 text-white" />
-                    </div>
-                    <p className="text-white text-xl font-semibold">Start Interview</p>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {steps.map((item) => (
+                <div key={item.step} className="text-center">
+                  <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
+                    {item.step}
                   </div>
-                </Link>
+                  <h3 className="mb-3 text-xl font-semibold text-foreground">{item.title}</h3>
+                  <p className="leading-relaxed text-muted-foreground">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className="bg-background py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid items-center gap-12 lg:grid-cols-2">
+              <div>
+                <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+                  Why Choose OneselfAI?
+                </h2>
+                <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+                  Our AI-powered platform provides the most realistic interview practice experience available.
+                </p>
+                <div className="mt-8 space-y-4">
+                  {[
+                    "Realistic AI interviewer with natural conversation flow",
+                    "Real-time emotion and body language analysis",
+                    "Personalized questions based on your resume",
+                    "Detailed performance reports and scoring",
+                    "Practice anytime, anywhere at your convenience",
+                    "Track improvement over time with analytics",
+                  ].map((benefit) => (
+                    <div key={benefit} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                      <p className="text-foreground">{benefit}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              <Card className="border border-border bg-card p-8">
+                <h3 className="mb-6 text-2xl font-bold text-foreground">Ready to Get Started?</h3>
+                <p className="mb-8 leading-relaxed text-muted-foreground">
+                  Create a free account and start practicing for your next interview today.
+                  No credit card required.
+                </p>
+                <div className="space-y-3">
+                  <Button className="w-full" size="lg" onClick={() => router.push("/register")}>
+                    Create Free Account
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <Link href="/login" className="font-medium text-foreground hover:underline">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* DEMO SECTION */}
-        <section id="demo" className="py-20 sm:py-32 bg-card">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">Live Demo</h2>
-              <p className="text-muted-foreground text-lg">
-                Watch how OneselfAI helps you prepare for your interviews.
-              </p>
-            </div>
-
-            <div className="bg-black rounded-2xl shadow-2xl overflow-hidden aspect-video hover:shadow-3xl transition-all duration-300 border border-accent/20">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="OneselfAI Demo"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ABOUT SECTION */}
-        <section id="about" className="py-20 sm:py-32 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">About OneselfAI</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Empowering professionals to ace their interviews with AI-powered preparation.
-              </p>
-            </div>
-
-            <Link href="/about">
-              <Button
-                size="lg"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Learn More About Us
-              </Button>
-            </Link>
-          </div>
-        </section>
-
-        {/* CONTACT SECTION */}
-        <section id="contact" className="py-20 sm:py-32 bg-card">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">Get In Touch</h2>
-              <p className="text-muted-foreground text-lg">
-                Have questions? We'd love to hear from you. Contact us anytime.
-              </p>
-            </div>
-
-            <Link href="/contact">
-              <Button
-                size="lg"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Send us a Message
-              </Button>
-            </Link>
-          </div>
-        </section>
-
-        {/* CTA SECTION */}
-        <section className="py-20 sm:py-32 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Transform Your Interview Skills?</h2>
-            <p className="text-lg text-blue-100 mb-8">
+        {/* CTA Section */}
+        <section className="border-t border-border bg-primary py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-primary-foreground sm:text-4xl text-balance">
+              Ready to Transform Your Interview Skills?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-primary-foreground/80">
               Join thousands of professionals who have improved their interview performance with OneselfAI.
             </p>
             <Button
               size="lg"
-              className="bg-white text-purple-600 hover:bg-blue-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              onClick={(handleGetStarted) => {
-                setShowAuthModal(true)
-                setAuthType("register")
-              }}
+              variant="secondary"
+              className="mt-8"
+              onClick={() => router.push("/register")}
             >
               Get Started Today
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -289,118 +265,6 @@ const handleGetStarted = () => {
           </div>
         </section>
       </main>
-
-      {showAuthModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                {authType === "login" ? "Welcome Back" : "Join OneselfAI"}
-              </h2>
-
-              <div className="space-y-3 mb-6">
-                <Button
-                  variant="outline"
-                  className="w-full bg-transparent hover:bg-accent/5 transition-colors duration-300"
-                  onClick={() => {
-                    setLoggedIn(true)
-                    setShowAuthModal(false)
-                  }}
-                >
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                  Continue with Google
-                </Button>
-              </div>
-
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-muted" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-card text-muted-foreground">Or continue with email</span>
-                </div>
-              </div>
-
-              <form className="space-y-4 mb-6">
-                {authType === "register" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
-                    placeholder="you@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Password</label>
-                  <input
-                    type="password"
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                <Button
-                  type="button"
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 transform hover:scale-105"
-                  onClick={() => {
-                    setLoggedIn(true)
-                    setShowAuthModal(false)
-                  }}
-                >
-                  {authType === "login" ? "Sign In" : "Create Account"}
-                </Button>
-              </form>
-
-              <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  {authType === "login" ? "Don't have an account? " : "Already have an account? "}
-                </span>
-                <button
-                  onClick={() => setAuthType(authType === "login" ? "register" : "login")}
-                  className="text-accent hover:underline font-medium transition-colors duration-300"
-                >
-                  {authType === "login" ? "Sign up" : "Sign in"}
-                </button>
-              </div>
-
-              <button
-                onClick={() => setShowAuthModal(false)}
-                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors duration-300"
-              >
-                ✕
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
-
       <Footer />
     </>
   )

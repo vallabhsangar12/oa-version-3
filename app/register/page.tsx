@@ -1,46 +1,49 @@
-"use client";
+"use client"
 
-import type React from "react";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
+import type React from "react"
+import Link from "next/link"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 
 export default function RegisterPage() {
-  const router = useRouter();
+  const router = useRouter()
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-  });
+  })
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
+      toast.error("Passwords do not match")
+      return
     }
 
-    setIsLoading(true);
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters")
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       const res = await fetch("/api/register", {
@@ -51,33 +54,31 @@ export default function RegisterPage() {
           email: formData.email.trim(),
           password: formData.password,
         }),
-      });
+      })
 
-      const data = await res.json();
+      const data = await res.json()
 
       if (!res.ok) {
-        alert(data.error || "Registration failed");
-        return;
+        toast.error(data.error || "Registration failed")
+        return
       }
 
-      alert("Registration successful");
-      router.push("/login");
+      toast.success("Account created! Please sign in.")
+      router.push("/login")
     } catch {
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background via-background to-accent/5">
-        <Card className="w-full max-w-md p-8 shadow-xl">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Create Account
-            </h1>
+      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-md border border-border bg-card p-8 shadow-lg">
+          <div className="mb-8 text-center">
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Create Account</h1>
             <p className="text-muted-foreground">
               Join OneselfAI and start your interview journey
             </p>
@@ -85,10 +86,13 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Full Name</label>
+              <label htmlFor="name" className="text-sm font-medium text-foreground">
+                Full Name
+              </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="name"
                   type="text"
                   name="name"
                   placeholder="John Doe"
@@ -101,10 +105,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="email"
                   type="email"
                   name="email"
                   placeholder="you@example.com"
@@ -117,10 +124,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Min. 6 characters"
@@ -142,10 +152,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
+                Confirm Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   placeholder="Repeat your password"
@@ -166,22 +179,18 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create Account"}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border text-center">
+          <div className="mt-6 border-t border-border pt-6 text-center">
             <p className="text-sm text-muted-foreground">
               {"Already have an account? "}
               <Link
                 href="/login"
-                className="text-accent hover:underline font-semibold"
+                className="font-semibold text-foreground hover:underline"
               >
                 Sign in
               </Link>
@@ -191,5 +200,5 @@ export default function RegisterPage() {
       </main>
       <Footer />
     </>
-  );
+  )
 }
