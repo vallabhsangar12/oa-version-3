@@ -70,7 +70,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent/70 rounded-lg flex items-center justify-center text-accent-foreground text-sm font-bold">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
               OA
             </div>
             <span className="hidden sm:inline">OneselfAI</span>
@@ -95,7 +95,7 @@ export function Navbar() {
                   onClick={() => setShowProfileMenu((v) => !v)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
                 >
-                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-accent-foreground">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white">
                     <User className="w-4 h-4" />
                   </div>
                   <span className="text-sm font-medium max-w-[100px] truncate hidden lg:block">

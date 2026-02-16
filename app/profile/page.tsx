@@ -95,7 +95,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               {/* Avatar */}
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center text-accent-foreground">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white">
                   <User className="w-8 h-8" />
                 </div>
                 <div>

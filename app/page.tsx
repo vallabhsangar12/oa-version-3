@@ -82,22 +82,22 @@ export default function Home() {
               className="w-full h-full object-cover"
               crossOrigin="anonymous"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1a1040]/95 via-[#0f1a3a]/90 to-[#111832]/95" />
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/95 via-blue-900/90 to-indigo-900/95" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="text-center space-y-8 text-[#f0f0ff]">
+            <div className="text-center space-y-8 text-white">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-balance leading-tight">
                 Master Your Interviews with AI
               </h1>
-              <p className="text-lg sm:text-xl text-[#c0c8e8] max-w-2xl mx-auto text-balance">
+              <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto text-balance">
                 Get real-time feedback, emotion analysis, and personalized
                 coaching to ace your next interview.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  className="bg-[#f0f0ff] text-[#1a1040] hover:bg-[#e0e0f5] font-semibold shadow-lg transition-all"
+                  className="bg-white text-purple-600 hover:bg-blue-50 font-semibold shadow-lg transition-all"
                   onClick={handleGetStarted}
                 >
                   Get Started
@@ -107,7 +107,7 @@ export default function Home() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-[#f0f0ff]/30 text-[#f0f0ff] hover:bg-[#f0f0ff]/10 bg-transparent transition-all"
+                    className="border-white/30 text-white hover:bg-white/10 bg-transparent transition-all"
                   >
                     Learn More
                   </Button>
@@ -117,7 +117,7 @@ export default function Home() {
           </div>
 
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <ChevronDown className="w-6 h-6 text-[#f0f0ff]" />
+            <ChevronDown className="w-6 h-6 text-white" />
           </div>
         </section>
 
@@ -177,16 +177,16 @@ export default function Home() {
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
                 />
-                <div className="absolute inset-0 bg-[#000]/30 group-hover:bg-[#000]/20 transition-colors" />
+                <div className="absolute inset-0 bg-purple-900/30 group-hover:bg-purple-900/20 transition-colors" />
                 <button
                   onClick={handleGetStarted}
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-[#fff]/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#fff]/30 transition-all group-hover:scale-110">
-                      <Play className="w-10 h-10 text-[#fff]" />
+                    <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all group-hover:scale-110">
+                      <Play className="w-10 h-10 text-white" />
                     </div>
-                    <p className="text-[#fff] text-xl font-semibold">
+                    <p className="text-white text-xl font-semibold">
                       Start Interview
                     </p>
                   </div>
@@ -218,18 +218,18 @@ export default function Home() {
         </section>
 
         {/* CTA SECTION */}
-        <section className="py-20 sm:py-32 bg-gradient-to-br from-[#1a1040] via-[#0f1a3a] to-[#111832]">
+        <section className="py-20 sm:py-32 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-balance text-[#f0f0ff]">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-balance text-white">
               Ready to Transform Your Interview Skills?
             </h2>
-            <p className="text-lg text-[#c0c8e8] mb-8">
+            <p className="text-lg text-blue-100 mb-8">
               Join thousands of professionals who have improved their interview
               performance with OneselfAI.
             </p>
             <Button
               size="lg"
-              className="bg-[#f0f0ff] text-[#1a1040] hover:bg-[#e0e0f5] font-semibold shadow-lg transition-all"
+              className="bg-white text-purple-600 hover:bg-blue-50 font-semibold shadow-lg transition-all"
               onClick={handleGetStarted}
             >
               Get Started Today
