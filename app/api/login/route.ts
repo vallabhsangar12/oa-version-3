@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { queryOne } from "@/lib/postgres";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_dev_secret";
 
@@ -23,10 +22,20 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await queryOne<UserRow>(
-      "SELECT id, name, email, password_hash FROM users WHERE email = $1",
-      [email.trim().toLowerCase()]
-    );
+    let user: UserRow | null = null;
+
+    try {
+      const { queryOne } = await import("@/lib/postgres");
+      user = await queryOne<UserRow>(
+        "SELECT id, name, email, password_hash FROM users WHERE email = $1",
+        [email.trim().toLowerCase()]
+      );
+    } catch {
+      return NextResponse.json(
+        { error: "Database is not available. Please try again later." },
+        { status: 503 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -63,7 +72,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return res;

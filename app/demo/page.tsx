@@ -1,17 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function DemoPage() {
-  const [isLoggedIn] = useState(false)
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar isLoggedIn={isLoggedIn} />
+      <Navbar />
 
       <main className="flex-1 w-full">
         {/* Hero Section */}
@@ -60,9 +58,12 @@ export default function DemoPage() {
             <Button
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              asChild
             >
-              <Play className="w-5 h-5 mr-2" />
-              Start Interview Practice
+              <Link href="/interview-ui">
+                <Play className="w-5 h-5 mr-2" />
+                Start Interview Practice
+              </Link>
             </Button>
           </div>
         </section>

@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { query, queryOne } from "@/lib/postgres";
 
 interface UserRow {
   id: string;
-  name: string;
-  email: string;
 }
 
 export async function POST(req: Request) {
@@ -33,25 +30,33 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if user already exists
-    const existing = await queryOne<UserRow>(
-      "SELECT id FROM users WHERE email = $1",
-      [email.trim().toLowerCase()]
-    );
+    try {
+      const { query, queryOne } = await import("@/lib/postgres");
 
-    if (existing) {
+      const existing = await queryOne<UserRow>(
+        "SELECT id FROM users WHERE email = $1",
+        [email.trim().toLowerCase()]
+      );
+
+      if (existing) {
+        return NextResponse.json(
+          { error: "User already exists" },
+          { status: 400 }
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await query(
+        "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)",
+        [name.trim(), email.trim().toLowerCase(), hashedPassword]
+      );
+    } catch {
       return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
+        { error: "Database is not available. Please try again later." },
+        { status: 503 }
       );
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await query(
-      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)",
-      [name.trim(), email.trim().toLowerCase(), hashedPassword]
-    );
 
     return NextResponse.json(
       { message: "Registration successful" },

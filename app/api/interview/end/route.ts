@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/utils/mongodb";
-import { query } from "@/lib/postgres";
-import { computeInterviewConfidenceScore } from "@/lib/scoring";
 
 function computeTextSentiment(text: string): number {
   if (!text || typeof text !== "string") return 60;
@@ -39,57 +36,88 @@ export async function POST(req: Request) {
       );
     }
 
-    const db = await getDb();
+    let faceEngagement = 60;
+    let voiceEnergy = 60;
+    let voiceStability = 60;
 
-    // Get latest face performance from MongoDB
-    const faceReport = await db
-      .collection("performance_reports")
-      .findOne({ sessionId }, { sort: { createdAt: -1 } });
+    // Try MongoDB for face/voice data
+    try {
+      const { getDb } = await import("@/utils/mongodb");
+      const db = await getDb();
 
-    // Get latest voice report from MongoDB
-    const voiceReport = await db
-      .collection("voice_reports")
-      .findOne({ sessionId }, { sort: { createdAt: -1 } });
+      const faceReport = await db
+        .collection("performance_reports")
+        .findOne({ sessionId }, { sort: { createdAt: -1 } });
+
+      const voiceReport = await db
+        .collection("voice_reports")
+        .findOne({ sessionId }, { sort: { createdAt: -1 } });
+
+      if (faceReport?.engagementScore) faceEngagement = faceReport.engagementScore;
+      if (voiceReport?.energyScore) voiceEnergy = voiceReport.energyScore;
+      if (voiceReport?.stabilityScore) voiceStability = voiceReport.stabilityScore;
+    } catch {
+      console.warn("MongoDB not available for interview/end");
+    }
 
     let sentimentScore = 60;
     if (transcript) {
       sentimentScore = computeTextSentiment(transcript);
     }
 
-    const finalScore = computeInterviewConfidenceScore({
-      face: { engagementScore: faceReport?.engagementScore || 60 },
-      voice: {
-        energyScore: voiceReport?.energyScore || 60,
-        stabilityScore: voiceReport?.stabilityScore || 60,
-      },
-      text: { sentimentScore },
-    });
+    // Compute score
+    let finalScore;
+    try {
+      const { computeInterviewConfidenceScore } = await import("@/lib/scoring");
+      finalScore = computeInterviewConfidenceScore({
+        face: { engagementScore: faceEngagement },
+        voice: { energyScore: voiceEnergy, stabilityScore: voiceStability },
+        text: { sentimentScore },
+      });
+    } catch {
+      finalScore = {
+        score: Math.round((faceEngagement + voiceEnergy + voiceStability + sentimentScore) / 4),
+        breakdown: { face: faceEngagement, voice: Math.round((voiceEnergy + voiceStability) / 2), text: sentimentScore },
+        details: { face: { engagementScore: faceEngagement }, voice: { energyScore: voiceEnergy, stabilityScore: voiceStability }, text: { sentimentScore } },
+      };
+    }
 
-    // Store final score in PostgreSQL
-    await query(
-      `INSERT INTO interview_results (user_id, session_id, score, summary, breakdown, face_metrics, voice_metrics, text_metrics)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        userId || null,
+    // Store in PostgreSQL
+    try {
+      const { query } = await import("@/lib/postgres");
+      await query(
+        `INSERT INTO interview_results (user_id, session_id, score, summary, breakdown, face_metrics, voice_metrics, text_metrics)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          userId || null,
+          sessionId,
+          finalScore.score,
+          `Final interview score: ${finalScore.score}/100`,
+          JSON.stringify(finalScore.breakdown),
+          JSON.stringify(finalScore.details.face),
+          JSON.stringify(finalScore.details.voice),
+          JSON.stringify(finalScore.details.text),
+        ]
+      );
+    } catch {
+      console.warn("PostgreSQL not available for interview/end result storage");
+    }
+
+    // Also log to MongoDB
+    try {
+      const { getDb } = await import("@/utils/mongodb");
+      const db = await getDb();
+      await db.collection("interview_logs").insertOne({
         sessionId,
-        finalScore.score,
-        `Final interview score: ${finalScore.score}/100`,
-        JSON.stringify(finalScore.breakdown),
-        JSON.stringify(finalScore.details.face),
-        JSON.stringify(finalScore.details.voice),
-        JSON.stringify(finalScore.details.text),
-      ]
-    );
-
-    // Also log to MongoDB for analytics
-    await db.collection("interview_logs").insertOne({
-      sessionId,
-      userId: userId || null,
-      transcript: transcript || null,
-      finalScore: finalScore.score,
-      breakdown: finalScore.breakdown,
-      createdAt: new Date(),
-    });
+        userId: userId || null,
+        transcript: transcript || null,
+        finalScore: finalScore.score,
+        breakdown: finalScore.breakdown,
+        createdAt: new Date(),
+      });
+    } catch {
+      console.warn("MongoDB not available for interview log");
+    }
 
     return NextResponse.json({ ok: true, ...finalScore });
   } catch (err: unknown) {

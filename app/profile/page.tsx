@@ -158,11 +158,13 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Member since:</span>
                     <span className="font-medium text-foreground">
-                      {new Date(data.user.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {data.user.createdAt
+                        ? new Date(data.user.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "N/A"}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">

@@ -1,16 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { saveFile } from "@/lib/file-storage";
-import { query } from "@/lib/postgres";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const userId = formData.get("userId") as string;
+    const file = formData.get("resume") as File | null;
 
-    if (!file || !userId) {
+    if (!file) {
       return NextResponse.json(
-        { error: "File and User ID required" },
+        { error: "Resume file is required" },
         { status: 400 }
       );
     }
@@ -28,32 +25,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "File size exceeds 5MB limit" },
+        { error: "File size exceeds 10MB limit" },
         { status: 400 }
       );
     }
 
-    // Save file to local storage
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = await saveFile(buffer, "resumes", file.name);
-
-    // Store metadata in PostgreSQL
-    await query(
-      "INSERT INTO resumes (user_id, file_path, original_name) VALUES ($1, $2, $3)",
-      [userId, filePath, file.name]
-    );
+    // For now, we acknowledge the upload. In production, parse and extract text.
+    // PDF text extraction would require a library like pdf-parse.
+    const text = `Resume uploaded: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
 
     return NextResponse.json(
       {
         message: "Resume uploaded successfully",
-        resumeUrl: filePath,
+        text,
         filename: file.name,
         size: file.size,
       },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Upload error:", error);
