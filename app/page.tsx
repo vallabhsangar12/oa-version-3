@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
@@ -20,6 +21,23 @@ import {
 
 export default function Home() {
   const router = useRouter()
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false)
+
+  const handleStartPractice = useCallback(async () => {
+    setIsCheckingAuth(true)
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" })
+      if (res.ok) {
+        router.push("/interview")
+      } else {
+        router.push("/login")
+      }
+    } catch {
+      router.push("/login")
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }, [router])
 
   const features = [
     {
@@ -121,11 +139,12 @@ export default function Home() {
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  onClick={() => router.push("/register")}
+                  onClick={handleStartPractice}
+                  disabled={isCheckingAuth}
                   className="min-w-[180px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  Start Free Practice
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {isCheckingAuth ? "Checking..." : "Start Free Practice"}
+                  {!isCheckingAuth && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
                 <Button
                   size="lg"

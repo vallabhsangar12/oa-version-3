@@ -52,7 +52,7 @@ export function Navbar() {
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Interview", href: "/interview-ui" },
-    { label: "Dashboard", href: "/dashboard" },
+    ...(loggedIn ? [{ label: "Dashboard", href: "/dashboard" }] : []),
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ]
