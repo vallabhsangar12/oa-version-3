@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
@@ -17,11 +17,17 @@ import {
   Sparkles,
   CheckCircle2,
   ChevronRight,
+  Play,
 } from "lucide-react"
 
 export default function Home() {
   const router = useRouter()
   const [isCheckingAuth, setIsCheckingAuth] = useState(false)
+  const demoRef = useRef<HTMLElement>(null)
+
+  const scrollToDemo = useCallback(() => {
+    demoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
 
   const handleStartPractice = useCallback(async () => {
     setIsCheckingAuth(true)
@@ -149,10 +155,11 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => router.push("/interview-ui")}
+                  onClick={scrollToDemo}
                   className="min-w-[180px] border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-300"
                 >
-                  Try a Demo
+                  <Play className="mr-2 h-4 w-4" />
+                  Try Demo
                 </Button>
               </div>
             </div>
@@ -201,6 +208,56 @@ export default function Home() {
                   </Card>
                 )
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* Demo Video Section */}
+        <section
+          id="demo-section"
+          ref={demoRef}
+          className="scroll-mt-20 border-t border-border bg-gradient-to-b from-purple-900/10 to-blue-900/10 py-20 sm:py-28"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold sm:text-4xl">
+                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">See It</span>{" "}
+                <span className="text-foreground">In Action</span>
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Watch how OneselfAI conducts real-time AI interviews with emotion analysis and personalized feedback.
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-4xl">
+              <div className="overflow-hidden rounded-2xl border border-purple-500/20 bg-card shadow-2xl shadow-purple-500/5">
+                <div className="relative aspect-video w-full bg-black">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="OneselfAI Demo - AI Interview Platform"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                <Button
+                  size="lg"
+                  onClick={handleStartPractice}
+                  disabled={isCheckingAuth}
+                  className="min-w-[200px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {isCheckingAuth ? "Checking..." : "Start Practicing Now"}
+                  {!isCheckingAuth && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+                <p className="text-sm text-muted-foreground">No credit card required</p>
+              </div>
             </div>
           </div>
         </section>
