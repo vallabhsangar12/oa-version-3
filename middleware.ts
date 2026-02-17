@@ -19,5 +19,13 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/interview-ui/:path*", "/interview/:path*", "/dashboard/:path*", "/profile/:path*"],
+  matcher: [
+    "/interview-ui/:path*",
+    "/interview/:path*",
+    "/interview/session/:path*",
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/profile/settings/:path*",
+    "/profile/upgrade/:path*",
+  ],
 };

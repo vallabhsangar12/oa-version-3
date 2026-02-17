@@ -51,8 +51,9 @@ export function Navbar() {
 
   const navItems = [
     { label: "Home", href: "/" },
-    { label: "Interview", href: "/interview-ui" },
+    ...(loggedIn ? [{ label: "Interview", href: "/interview" }] : []),
     ...(loggedIn ? [{ label: "Dashboard", href: "/dashboard" }] : []),
+    { label: "Pricing", href: "/pricing" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ]

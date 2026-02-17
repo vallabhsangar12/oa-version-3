@@ -31,7 +31,7 @@ const fetcher = (url: string) => fetch(url, { credentials: "include" }).then((re
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { data, error, isLoading } = useSWR("/api/dashboard", fetcher)
+  const { data, error, isLoading } = useSWR("/api/dashboard-stats", fetcher)
 
   return (
     <>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Button
-              onClick={() => router.push("/interview-ui")}
+              onClick={() => router.push("/interview")}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Plus className="mr-2 h-4 w-4" /> New Interview
@@ -72,7 +72,7 @@ export default function DashboardPage() {
           )}
 
           {/* Empty State */}
-          {data && !error && !isLoading && data.stats?.totalInterviews === 0 && (
+          {data && !error && !isLoading && data.total_interviews === 0 && (
             <Card className="border border-border p-12 text-center">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
                 <Target className="h-8 w-8 text-muted-foreground" />
@@ -83,7 +83,7 @@ export default function DashboardPage() {
               </p>
               <Button
                 className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={() => router.push("/interview-ui")}
+                onClick={() => router.push("/interview")}
               >
                 Start Your First Interview
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -98,91 +98,41 @@ export default function DashboardPage() {
               <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                   label="Average Score"
-                  value={data.stats?.avgScore || 0}
+                  value={data.avg_score || 0}
                   icon={<Award className="h-8 w-8 text-muted-foreground" />}
                 />
                 <StatCard
                   label="Total Interviews"
-                  value={data.stats?.totalInterviews || 0}
+                  value={data.total_interviews || 0}
                   icon={<Target className="h-8 w-8 text-muted-foreground" />}
                 />
                 <StatCard
-                  label="Completed"
-                  value={data.stats?.completedInterviews || 0}
+                  label="Best Score"
+                  value={data.best_score || 0}
                   icon={<Award className="h-8 w-8 text-muted-foreground" />}
                 />
                 <StatCard
-                  label="Improvement"
-                  value={`${data.stats?.improvement > 0 ? "+" : ""}${data.stats?.improvement || 0}%`}
+                  label="Last Score"
+                  value={data.last_interview_score || "N/A"}
                   icon={<TrendingUp className="h-8 w-8 text-muted-foreground" />}
                 />
               </div>
 
-              {/* Charts */}
-              {data.performanceData?.length > 0 && (
-                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <Card className="border border-border p-6">
-                    <h3 className="mb-4 text-lg font-semibold text-foreground">Performance Trend</h3>
-                    <ResponsiveContainer width="100%" height={280}>
-                      <LineChart data={data.performanceData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
-                        <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "var(--card)",
-                            border: "1px solid var(--border)",
-                            borderRadius: "8px",
-                            color: "var(--foreground)",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="score"
-                          stroke="var(--primary)"
-                          strokeWidth={2}
-                          dot={{ fill: "var(--primary)", r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Card>
 
-                  {data.skillsData?.length > 0 && (
-                    <Card className="border border-border p-6">
-                      <h3 className="mb-4 text-lg font-semibold text-foreground">Skills Breakdown</h3>
-                      <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={data.skillsData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                          <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
-                          <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "var(--card)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              color: "var(--foreground)",
-                            }}
-                          />
-                          <Bar dataKey="value" fill="var(--primary)" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </Card>
-                  )}
-                </div>
-              )}
 
               {/* Recent Interviews */}
-              {data.recentInterviews?.length > 0 && (
+              {data.interviews?.length > 0 && (
                 <Card className="border border-border p-6">
                   <h3 className="mb-4 text-lg font-semibold text-foreground">Recent Interviews</h3>
                   <div className="space-y-3">
-                    {data.recentInterviews.map((interview: {
+                    {data.interviews.map((interview: {
                       id: string
-                      date: string
-                      type: string
+                      created_at: string
+                      interview_type: string
                       difficulty: string
                       status: string
                       score: number | null
+                      job_role: string
                     }) => (
                       <div
                         key={interview.id}
@@ -190,10 +140,10 @@ export default function DashboardPage() {
                       >
                         <div>
                           <p className="font-medium text-foreground">
-                            {interview.type === "technical" ? "Technical" : "Behavioral"} Interview
+                            {interview.job_role || `${interview.interview_type} Interview`}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(interview.date).toLocaleDateString()} - {interview.difficulty}
+                            {new Date(interview.created_at).toLocaleDateString()} - {interview.difficulty}
                           </p>
                         </div>
                         <div className="flex items-center gap-4">
@@ -204,7 +154,7 @@ export default function DashboardPage() {
                                 <p className="text-xs text-muted-foreground">Score</p>
                               </>
                             ) : (
-                              <span className="rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
+                              <span className="rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground capitalize">
                                 {interview.status}
                               </span>
                             )}
