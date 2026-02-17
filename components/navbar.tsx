@@ -106,18 +106,33 @@ export function Navbar() {
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-popover shadow-lg">
+                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-popover shadow-lg z-50">
+                    {/* User Info Header */}
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-semibold text-foreground">User Menu</p>
+                    </div>
+                    
+                    {/* Menu Items */}
                     <Link href="/dashboard" onClick={() => setProfileOpen(false)}>
-                      <button className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-popover-foreground hover:bg-secondary transition-colors rounded-t-lg">
+                      <button className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-popover-foreground hover:bg-secondary transition-colors">
                         <LayoutDashboard className="h-4 w-4" /> Dashboard
                       </button>
                     </Link>
-                    <Link href="/profile" onClick={() => setProfileOpen(false)}>
+                    
+                    <Link href="/profile/settings" onClick={() => setProfileOpen(false)}>
                       <button className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-popover-foreground hover:bg-secondary transition-colors">
-                        <User className="h-4 w-4" /> Profile
+                        <User className="h-4 w-4" /> Settings
                       </button>
                     </Link>
+                    
+                    <Link href="/profile/upgrade" onClick={() => setProfileOpen(false)}>
+                      <button className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-purple-400 hover:bg-secondary transition-colors">
+                        <span className="text-base">⭐</span> Upgrade Plan
+                      </button>
+                    </Link>
+                    
                     <div className="border-t border-border" />
+                    
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-destructive-foreground hover:bg-destructive/10 transition-colors rounded-b-lg"
@@ -128,17 +143,13 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Button variant="ghost" onClick={() => router.push("/login")} className="text-sm">
-                  Sign In
-                </Button>
-                <Button
-                  onClick={() => router.push("/register")}
-                  className="text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  Get Started
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/login")}
+                className="hidden sm:flex text-sm"
+              >
+                Login
+              </Button>
             )}
 
             {/* Mobile Menu Toggle */}
@@ -194,27 +205,16 @@ export function Navbar() {
                   </Button>
                 </>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-sm"
-                    onClick={() => {
-                      router.push("/login")
-                      setMobileOpen(false)
-                    }}
-                  >
-                    Sign In
-                  </Button>
-                  <Button
-                    className="w-full text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
-                    onClick={() => {
-                      router.push("/register")
-                      setMobileOpen(false)
-                    }}
-                  >
-                    Get Started
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm"
+                  onClick={() => {
+                    router.push("/login")
+                    setMobileOpen(false)
+                  }}
+                >
+                  Login
+                </Button>
               )}
             </div>
           </div>

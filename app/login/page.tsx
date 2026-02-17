@@ -44,8 +44,8 @@ export default function LoginPage() {
       }
 
       setLoggedIn(true)
-      toast.success("Welcome back!")
-      router.push(redirect || "/dashboard")
+      toast.success("Login successful")
+      router.push(redirect || "/")
     } catch {
       toast.error("Something went wrong. Please try again.")
     } finally {

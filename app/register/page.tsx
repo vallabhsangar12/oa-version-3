@@ -9,7 +9,7 @@ import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, FileText } from "lucide-react"
 import { toast } from "sonner"
 
 export default function RegisterPage() {
@@ -25,6 +25,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
+  const [isUploadingResume, setIsUploadingResume] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -46,6 +48,7 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
+      // Register user
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,6 +64,29 @@ export default function RegisterPage() {
       if (!res.ok) {
         toast.error(data.error || "Registration failed")
         return
+      }
+
+      // Upload resume if provided
+      if (resumeFile) {
+        setIsUploadingResume(true)
+        try {
+          const formDataResume = new FormData()
+          formDataResume.append("file", resumeFile)
+
+          const resumeRes = await fetch("/api/resume-upload", {
+            method: "POST",
+            body: formDataResume,
+            credentials: "include",
+          })
+
+          if (!resumeRes.ok) {
+            console.warn("Resume upload failed during registration")
+          }
+        } catch (err) {
+          console.warn("Failed to upload resume:", err)
+        } finally {
+          setIsUploadingResume(false)
+        }
       }
 
       toast.success("Account created! Please sign in.")
@@ -177,6 +203,20 @@ export default function RegisterPage() {
                   {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+            </div>
+
+            <div className="space-y-2 border-t border-border pt-4">
+              <label htmlFor="resume" className="text-sm font-medium text-foreground">
+                Resume (Optional)
+              </label>
+              <input
+                id="resume"
+                type="file"
+                accept=".pdf"
+                onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-600 hover:file:bg-purple-500/20"
+              />
+              <p className="text-xs text-muted-foreground">PDF only, max 5MB</p>
             </div>
 
             <Button
