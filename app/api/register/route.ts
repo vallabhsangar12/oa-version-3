@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
+import { signJWT, setAuthCookie } from "@/lib/auth"
 
 interface UserRow {
   id: string;
@@ -45,28 +46,48 @@ export async function POST(req: Request) {
         );
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10)
 
-      await query(
-        "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)",
+      const result = await queryOne<UserRow>(
+        "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
         [name.trim(), email.trim().toLowerCase(), hashedPassword]
-      );
-    } catch {
-      return NextResponse.json(
-        { error: "Database is not available. Please try again later." },
-        { status: 503 }
-      );
-    }
+      )
 
-    return NextResponse.json(
-      { message: "Registration successful" },
-      { status: 201 }
-    );
+      if (!result) {
+        return NextResponse.json(
+          { error: "Failed to create user" },
+          { status: 500 }
+        )
+      }
+
+      // Auto-login user after registration
+      const token = signJWT({
+        userId: result.id,
+        email: email.trim().toLowerCase(),
+        name: name.trim(),
+      })
+
+      const res = NextResponse.json(
+        { message: "Registration successful" },
+        { status: 201 }
+      )
+
+      const authCookie = setAuthCookie(token, process.env.NODE_ENV === "production")
+      res.cookies.set(authCookie.token, token, authCookie.options)
+
+      return res
+    } catch (err) {
+      console.error("[AUTH] Database error during registration:", err)
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 503 }
+      )
+    }
   } catch (err) {
-    console.error("Register API error:", err);
+    console.error("[AUTH] Register error:", err)
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "Internal server error" },
       { status: 500 }
-    );
+    )
   }
 }

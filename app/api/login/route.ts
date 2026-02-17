@@ -1,62 +1,61 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_dev_secret";
+import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
+import { signJWT, setAuthCookie } from "@/lib/auth"
 
 interface UserRow {
-  id: string;
-  name: string;
-  email: string;
-  password_hash: string;
+  id: string
+  name: string
+  email: string
+  password_hash: string
 }
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const { email, password } = await req.json()
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Email and password are required" },
         { status: 400 }
-      );
+      )
     }
 
-    let user: UserRow | null = null;
+    const { queryOne } = await import("@/lib/postgres")
+    let user: UserRow | null = null
 
     try {
-      const { queryOne } = await import("@/lib/postgres");
       user = await queryOne<UserRow>(
         "SELECT id, name, email, password_hash FROM users WHERE email = $1",
         [email.trim().toLowerCase()]
-      );
-    } catch {
+      )
+    } catch (err) {
+      console.error("[AUTH] Database error during login:", err)
       return NextResponse.json(
-        { error: "Database is not available. Please try again later." },
+        { error: "Database connection failed" },
         { status: 503 }
-      );
+      )
     }
 
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid email or password" },
         { status: 401 }
-      );
+      )
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);
+    const isValid = await bcrypt.compare(password, user.password_hash)
     if (!isValid) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid email or password" },
         { status: 401 }
-      );
+      )
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, name: user.name },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = signJWT({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    })
 
     const res = NextResponse.json({
       message: "Login successful",
@@ -65,22 +64,17 @@ export async function POST(req: Request) {
         email: user.email,
         name: user.name,
       },
-    });
+    })
 
-    res.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60,
-    });
+    const authCookie = setAuthCookie(token, process.env.NODE_ENV === "production")
+    res.cookies.set(authCookie.token, token, authCookie.options)
 
-    return res;
+    return res
   } catch (err) {
-    console.error("Login API error:", err);
+    console.error("[AUTH] Login error:", err)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
-    );
+    )
   }
 }

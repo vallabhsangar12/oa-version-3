@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyJWT } from '@/src/utils/auth'
+import { verifyJWT } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,15 +13,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const userId = (payload as any).userId || (payload as any).sub
+    const userId = payload.userId
 
     // Try to use database if available
     try {
-      const postgres = await import('@/lib/postgres')
-      const { pool } = postgres
+      const { getPool } = await import('@/lib/postgres')
+      const pool = getPool()
 
       if (!pool) {
-        // Return default mock data
+        // Return default empty data
         return NextResponse.json(
           {
             total_interviews: 0,

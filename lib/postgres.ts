@@ -2,23 +2,25 @@ import { Pool, type QueryResultRow } from "pg";
 
 const connectionString = process.env.POSTGRES_URL;
 
-if (!connectionString) {
-  console.warn("POSTGRES_URL is not set. PostgreSQL features will not work.");
-}
-
 let pool: Pool | null = null;
 
 function getPool(): Pool {
   if (!pool) {
+    if (!connectionString) {
+      throw new Error(
+        "POSTGRES_URL environment variable is not set. Cannot connect to database."
+      );
+    }
+
     pool = new Pool({
-      connectionString: connectionString || "",
+      connectionString: connectionString,
       max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     });
 
     pool.on("error", (err) => {
-      console.error("Unexpected PostgreSQL pool error:", err);
+      console.error("[DB] Unexpected PostgreSQL pool error:", err);
     });
   }
   return pool;
@@ -41,4 +43,6 @@ export async function queryOne<T extends QueryResultRow = QueryResultRow>(
   return rows[0] || null;
 }
 
+export { getPool };
+export { pool };
 export default getPool;
