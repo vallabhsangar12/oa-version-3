@@ -226,13 +226,14 @@ export default function InterviewSessionPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              disabled
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6 text-lg"
-            >
-              Start AI Interview
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link href={`/interview/session/${sessionId}/loading`} className="flex-1">
+              <Button
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6 text-lg"
+              >
+                Start AI Interview
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/dashboard" className="flex-1">
               <Button
                 variant="outline"
@@ -241,13 +242,6 @@ export default function InterviewSessionPage() {
                 Back to Dashboard
               </Button>
             </Link>
-          </div>
-
-          {/* Note */}
-          <div className="mt-12 p-4 rounded-lg bg-secondary/50 border border-border">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">Note:</span> The AI interview engine with facial emotion detection, voice analysis, and real-time evaluation will be implemented in the next development phase. This session is saved and ready for integration.
-            </p>
           </div>
         </div>
       </main>
